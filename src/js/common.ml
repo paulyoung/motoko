@@ -5,14 +5,14 @@ open Mo_config
 module Js = Js_of_ocaml.Js
 module Sys_js = Js_of_ocaml.Sys_js
 
-let position_of_pos (pos : Source.pos) =
+let position_of_pos pos =
   object%js
     (* The LSP spec requires zero-based positions *)
     val line = if pos.line > 0 then pos.line - 1 else 0
     val character = pos.column
   end
 
-let range_of_region (at : Source.region) =
+let range_of_region at =
   object%js
     val start = position_of_pos at.left
     val _end = position_of_pos at.right
