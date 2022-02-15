@@ -505,7 +505,7 @@ and node_of_dec (triv_table : Trivia.triv_table) (dec : Syntax.dec) : node =
 let node_of_prog (prog : Syntax.prog) : prog_node =
   let decs = List.map (node_of_dec prog.note.trivia) prog.it in
   object%js
-    val _type = Js.string "Prog"
+    val _type = Js.string "Program"
     val loc = source_location_of_region prog.at
     val comments = comments_of_triv_table prog.note.trivia prog.at
     val declarations = Js.array (Array.of_list decs)
