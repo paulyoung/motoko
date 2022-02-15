@@ -6,6 +6,14 @@
 )
 
 (executable
+ (name mo_prettier)
+ (modules mo_prettier)
+ (libraries checkseum.ocaml mo_def mo_types pipeline)
+ (js_of_ocaml (flags --no-extern-fs --no-source-map))
+ (preprocess (pps js_of_ocaml-ppx))
+)
+
+(executable
  (name moc_js)
  (modules moc_js)
  (libraries common mo_config idllib)

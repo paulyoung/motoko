@@ -55,10 +55,11 @@ let
         # Rust nightly
         (self: super: let
           moz_overlay = import self.sources.nixpkgs-mozilla self super;
-          rust-channel = moz_overlay.rustChannelOf { date = "2022-02-02"; channel = "nightly"; };
+          rust-channel = moz_overlay.rustChannelOf { date = "2021-12-02"; channel = "nightly"; };
         in rec {
           rustc-nightly = rust-channel.rust.override {
             targets = [
+               "wasm32-unknown-unknown"
                "wasm32-unknown-emscripten"
                "wasm32-wasi"
                "i686-unknown-linux-gnu"
@@ -87,8 +88,46 @@ let
           };
         })
 
-        # get nix-build-uncached 1.1.1 (can be removed once that’s in our nixpkgs)
-        (self: super: { nix-build-uncached = self.callPackage ./nix-build-uncached.nix {}; })
+        (self: super: {
+          # https://github.com/nmattia/niv/issues/332#issuecomment-958449218
+          niv = self.haskell.lib.compose.overrideCabal (drv: { enableSeparateBinOutput = false; }) super.haskellPackages.niv;
+
+          # https://github.com/NixOS/nixpkgs/pull/109571
+          wasmtime = with self; rustPlatform.buildRustPackage rec {
+            pname = "wasmtime";
+            version = "0.32.0";
+
+            src = fetchFromGitHub {
+              owner = "bytecodealliance";
+              repo = pname;
+              rev = "v${version}";
+              sha256 = "sha256-iko2G2cUIQYv7Sia8fLtb7d6XCbpOKz31ST62eE19B0";
+              fetchSubmodules = true;
+            };
+
+            cargoSha256 = "sha256-z8x004BbRWi9cRf2I27uiFuu2Jnr1Z3Ey992S5hdyNs";
+
+            nativeBuildInputs = [ python cmake clang ];
+            buildInputs = [ llvmPackages.libclang ] ++
+            lib.optionals stdenv.isDarwin [ darwin.apple_sdk.frameworks.Security ];
+            LIBCLANG_PATH = "${llvmPackages.libclang.lib}/lib";
+
+            configurePhase = ''
+              export HOME=$TMP;
+            '';
+
+            doCheck = true;
+
+            meta = with lib; {
+              description = "Standalone JIT-style runtime for WebAssembly, using Cranelift";
+              homepage = "https://github.com/bytecodealliance/wasmtime";
+              license = licenses.asl20;
+              maintainers = [ maintainers.matthewbauer ];
+              platforms = platforms.unix;
+            };
+          };
+        })
+
       ];
     };
 in

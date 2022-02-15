@@ -166,7 +166,7 @@ rec {
       vendorRustStdDeps = "${cargoVendorTools}/bin/vendor-rust-std-deps";
 
       # SHA256 of Rust std deps
-      rustStdDepsHash = "sha256-+D0OXpU3/MJ06DsmQQiGWohvZz5ALTmJpc7HfAhd7S4";
+      rustStdDepsHash = "sha256-jCe1HXSexW6p8QINrMtcBDO1TDWkg2glZwnf1EqLuB0=";
 
       # Vendor directory for Rust std deps
       rustStdDeps = nixpkgs.stdenvNoCC.mkDerivation {
@@ -226,6 +226,7 @@ rec {
       buildInputs = rtsBuildInputs;
 
       preBuild = ''
+        export HOME=$TMP
         export CARGO_HOME=$PWD/cargo-home
 
         # This replicates logic from nixpkgs’ pkgs/build-support/rust/default.nix
@@ -490,6 +491,7 @@ rec {
       moc = mk "moc";
       moc_interpreter = mk "moc_interpreter";
       didc = mk "didc";
+      mo_prettier = mk "mo_prettier";
       recurseForDerivations = true;
     };
 
